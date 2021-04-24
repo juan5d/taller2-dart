@@ -9,6 +9,7 @@ class HomePage extends StatefulWidget {
 class _MyHomePageState extends State<HomePage> {
   String operaciones = "";
   bool estado=false;
+  List <Text>  listaResultado =[];
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +26,22 @@ class _MyHomePageState extends State<HomePage> {
     return Column(
       children:[
         Expanded(
-                  child: Container(
-            color: Colors.red,
+            child: Container(
+              color: Colors.red,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: listaResultado,
+                    )
+                  ],
+                ),
+              ),
+              
           ),
         ),
         Container(
@@ -172,6 +187,7 @@ class _MyHomePageState extends State<HomePage> {
                       operaciones= "";
                       estado=true;
                   });}, child: Text("C")),
+                  
                   ElevatedButton(onPressed: () {
                     setState(() {
                       
@@ -187,19 +203,52 @@ class _MyHomePageState extends State<HomePage> {
                       for (var i = 2; i <valores.length;i++) {
                         
                       if (i==2) {
-                          total= casos(int.parse(valores[0]),valores[1],int.parse(valores[2]));
+                        try {
+                          total= casos(double.parse(valores[0]),valores[1],double.parse(valores[2]));
+                        } catch (e) {
+                          print(e);
+                          total=0;
+                          i=valores.length;
+                          showDialog(context: context, builder: (_)=> AlertDialog());
+                        }
+                          
                         i=i+1;
                         }
                       if(i>2 && i<valores.length){
-                        
-                        total=casos(total,valores[i],int.parse(valores[i+1]));
-                     i=i+1;
+                        try {
+                          total=casos(double.parse(total),valores[i],double.parse(valores[i+1]));
+    
+                        } catch (e) {
+                          print(e);
+                          total=0;
+                          i=valores.length;
+                          showDialog(context: context, builder: (_)=> AlertDialog());
+                        }
+                                         i=i+1;
                         
                       }
 
 
                       }
+                      if(total=="no"){
+                        total="Division por 0 no esta contemplada ";
+                      showDialog(context: context, builder: (_)=> AlertDialog(
+                        title: Text("Error"),
+                        content: Text("Division por 0"),
+                        actions: [
+                          FlatButton(onPressed: (){
+                            Navigator.of(context).pop();
+                            operaciones="";
+                          }, child: Text("Cerrar")),
+                        ],
+                        elevation: 24.0,
+                      ),);
+                      }
+                      listaResultado.add(Text('Operacion:'));
+                      listaResultado.add(Text("$operaciones"));
                       operaciones=total.toString();
+                      listaResultado.add(Text('Total:'));
+                      listaResultado.add(Text("$operaciones"));
                       estado=false;
                       
                     });
@@ -220,7 +269,7 @@ class _MyHomePageState extends State<HomePage> {
   }
 }
 
-int casos(var valor1, String operador,var valor2){
+String casos(var valor1, String operador,var valor2){
   var total;
   print("operacion");
   print(valor1);
@@ -237,8 +286,13 @@ int casos(var valor1, String operador,var valor2){
                           total =  valor1 * valor2;
                         break;
                         case '/': 
+                        if(valor2!=0){
                           total =  valor1 /  valor2;
+                        }
+                        else{
+                          total="no";
+                        }
                         break;
                       }
-                      return total;
+                      return total.toString();
 }
