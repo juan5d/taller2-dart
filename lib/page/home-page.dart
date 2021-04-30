@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:taller2/page/resultados.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -56,6 +59,36 @@ class _MyHomePageState extends State<HomePage> {
         Container(
           child: Column(
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(onPressed: () {
+                    setState(() {
+                      operaciones += "";
+                      
+                    });
+                  }, child: Text("CE") ),
+                  ElevatedButton(onPressed: () {
+                    setState(() {
+                      operaciones= "";
+                      estado=true;
+                    });
+                  }, child: Text("C")),
+                  ElevatedButton(onPressed: () {
+                    setState(() {
+                        estado=true;
+                      
+                      operaciones += "√ ";
+                    });
+                  }, child: Text("√")),
+                  ElevatedButton(onPressed: () {
+                    setState(() {
+                      operaciones += " ²";
+                      estado=true;
+                    });
+                  }, child: Text("² ")),
+                ]
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -176,28 +209,31 @@ class _MyHomePageState extends State<HomePage> {
                   ElevatedButton(onPressed: () {
                     setState(() {
                       if(estado==false){
-                        operaciones="";
+                        operaciones=".";
                         estado=true;
                       }
-                      operaciones += "0";
+                      operaciones += ".";
                     });
-                  }, child: Text("0") ),
+                  }, child: Text(".") ),
                   ElevatedButton(onPressed: () {
                     setState(() {
-                      operaciones= "";
+                      operaciones+= "0";
                       estado=true;
-                  });}, child: Text("C")),
+                  });}, child: Text("0")),
                   
                   ElevatedButton(onPressed: () {
                     setState(() {
-                      
-                      var operaciones2= operaciones.replaceAll("-", ",").replaceAll("+", ",").replaceAll("*", ",").replaceAll("/", ",").replaceAll(" ", "");
+                      var total;
+                      var ant=operaciones;
+                      var operaciones2= operaciones.replaceAll("²", ",").replaceAll("√", ",").replaceAll("-", ",").replaceAll("+", ",").replaceAll("*", ",").replaceAll("/", ",").replaceAll(" ", "");
                       var array=operaciones2.split(",");
                       var valores1 = operaciones.replaceAll(" ", ",");
                       var valores = valores1.split(',') ;
+print("w");
+    print(operaciones);
+                      if(valores.length>=3){
                       print(valores);
-                      var total;
-                      print(array);
+                      
     print("tamaño");
     print(valores.length);
                       for (var i = 2; i <valores.length;i++) {
@@ -209,7 +245,17 @@ class _MyHomePageState extends State<HomePage> {
                           print(e);
                           total=0;
                           i=valores.length;
-                          showDialog(context: context, builder: (_)=> AlertDialog());
+                          showDialog(context: context, builder: (_)=> AlertDialog(
+                        title: Text("Error"),
+                        content: Text("No se tuvo una buena redaccion en la operacion"),
+                        actions: [
+                          FlatButton(onPressed: (){
+                            Navigator.of(context).pop();
+                            operaciones="";
+                          }, child: Text("Cerrar")),
+                        ],
+                        elevation: 24.0,
+                      ),);
                         }
                           
                         i=i+1;
@@ -222,7 +268,17 @@ class _MyHomePageState extends State<HomePage> {
                           print(e);
                           total=0;
                           i=valores.length;
-                          showDialog(context: context, builder: (_)=> AlertDialog());
+                          showDialog(context: context, builder: (_)=> AlertDialog(
+                        title: Text("Error"),
+                        content: Text("No se tuvo una buena redaccion en la operacion"),
+                        actions: [
+                          FlatButton(onPressed: (){
+                            Navigator.of(context).pop();
+                            operaciones="";
+                          }, child: Text("Cerrar")),
+                        ],
+                        elevation: 24.0,
+                      ),);
                         }
                                          i=i+1;
                         
@@ -244,13 +300,21 @@ class _MyHomePageState extends State<HomePage> {
                         elevation: 24.0,
                       ),);
                       }
-                      listaResultado.add(Text('Operacion:'));
-                      listaResultado.add(Text("$operaciones"));
-                      operaciones=total.toString();
-                      listaResultado.add(Text('Total:'));
-                      listaResultado.add(Text("$operaciones"));
                       estado=false;
+                      }
+else{
+  
+  total= validarOperacionesCuadraticas(operaciones).toString();
                       
+                      
+                      
+}
+listaResultado.add(Text("$ant"+"="+"$total",
+    style: TextStyle(color: Colors.blue, fontSize:20),));
+
+operaciones=ant+" = "+total.toString();
+
+
                     });
                   }, child: Text("=")),
                   ElevatedButton(onPressed: () {
@@ -260,6 +324,18 @@ class _MyHomePageState extends State<HomePage> {
                     });
                   }, child: Text("+")),
                 ]
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(onPressed:() {
+                    Navigator.push(context, 
+                    MaterialPageRoute(
+                      builder: (context)=>ResultadosPage(
+                      listadoResultados:listaResultado
+                    )));
+                  }, child: Text("Mostrar Resultados"))
+                ],
               )
 
           ],),
@@ -296,3 +372,21 @@ String casos(var valor1, String operador,var valor2){
                       }
                       return total.toString();
 }
+num validarOperacionesCuadraticas(String numeroCuadratico) {
+    num resultado;
+    print(numeroCuadratico);
+    if (numeroCuadratico.contains("²")) {
+      var numero = double.parse(numeroCuadratico.split("²")[0]);
+      resultado = numero * numero;
+      resultado = resultado % 1 == 0 ? resultado.round() : resultado;
+      return resultado;
+    }
+
+    if (numeroCuadratico.contains("√")) {
+      var numero = double.parse(numeroCuadratico.split("√")[1]);
+      resultado = sqrt(numero);
+      resultado = resultado % 1 == 0 ? resultado.round() : resultado;
+      return resultado;
+    }
+    return double.parse(numeroCuadratico);
+  }
